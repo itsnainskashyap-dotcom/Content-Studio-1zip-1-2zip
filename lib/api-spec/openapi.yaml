@@ -1,0 +1,1990 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: ai
+    description: AI generation operations (story, prompts, music, voiceover)
+  - name: storage
+    description: Object storage upload and serving endpoints
+  - name: auth
+    description: User authentication (signup, signin, signout, current user)
+  - name: projects
+    description: Per-user project CRUD (server-side persistence + cross-device sync)
+  - name: video-studio
+    description: AI Video Studio — story-driven continuous cinematic video generation
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /generate-story:
+    post:
+      operationId: generateStory
+      tags: [ai]
+      summary: Generate a structured story from a brief
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StoryRequest"
+      responses:
+        "200":
+          description: Generated story
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StoryResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+  /continue-story:
+    post:
+      operationId: continueStory
+      tags: [ai]
+      summary: Continue an existing story with new acts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContinueStoryRequest"
+      responses:
+        "200":
+          description: Continued story
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StoryResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+  /generate-video-prompts:
+    post:
+      operationId: generateVideoPrompts
+      tags: [ai]
+      summary: Generate video prompts for one part of the video, optimized for the selected target model (Seedance 2.0, Veo 3, Kling 2.1, Sora, Runway Gen-4, Luma Ray-2, Hailuo 02, Pika 2.0)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VideoPromptsRequest"
+      responses:
+        "200":
+          description: Generated video part
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VideoPromptsResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+  /edit-video-prompts:
+    post:
+      operationId: editVideoPrompts
+      tags: [ai]
+      summary: Refine an existing video part with a writer instruction while preserving continuity to surrounding parts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EditVideoPromptsRequest"
+      responses:
+        "200":
+          description: Refined video part
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VideoPromptsResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+  /generate-music-brief:
+    post:
+      operationId: generateMusicBrief
+      tags: [ai]
+      summary: Generate a Suno/Udio music brief for the project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MusicBriefRequest"
+      responses:
+        "200":
+          description: Generated music brief
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MusicBriefResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+  /generate-voiceover:
+    post:
+      operationId: generateVoiceover
+      tags: [ai]
+      summary: Generate a voiceover script in English, Hindi, or Hinglish for one video part
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VoiceoverRequest"
+      responses:
+        "200":
+          description: Generated voiceover
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoiceoverResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+  /expand-prompt:
+    post:
+      operationId: expandPrompt
+      tags: [ai]
+      summary: Expand a too-short Seedance copyablePrompt into the 4200-4500 char band by adding structural detail without altering meaning.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdjustPromptRequest"
+      responses:
+        "200":
+          description: Expanded prompt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdjustPromptResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+  /trim-prompt:
+    post:
+      operationId: trimPrompt
+      tags: [ai]
+      summary: Trim a too-long Seedance copyablePrompt back into the 4200-4500 char band without dropping shots, sections, or audio bullets.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdjustPromptRequest"
+      responses:
+        "200":
+          description: Trimmed prompt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdjustPromptResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+  /generate-character-images:
+    post:
+      operationId: generateCharacterImages
+      tags: [ai]
+      summary: Generate a multi-angle character reference sheet for each story character using Google Gemini (Nano Banana). Each image contains front, left-profile, and right-profile views in a single composite suitable for downloading and pasting into Seedance as a character reference.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CharacterImagesRequest"
+      responses:
+        "200":
+          description: Generated character images (one per character; failures returned in errors[])
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CharacterImagesResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+  /generate-frame-image:
+    post:
+      operationId: generateFrameImage
+      tags: [ai]
+      summary: Generate ONE Gemini image for a video part's starting or ending frame. Wraps the writer's frame prompt in a film-still instruction template, optionally injects character reference sheets so the cast stays on-model.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateFrameImageRequest"
+      responses:
+        "200":
+          description: Generated frame still
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenerateFrameImageResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+  /qc-frame-image:
+    post:
+      operationId: qcFrameImage
+      tags: [ai]
+      summary: Quality-control review of a generated frame still. Loads the image from object storage and asks Gemini Vision to score how well it matches the writer's frame prompt and the cast reference sheets. Returns a structured score + issues so the client can decide whether to ship the frame or auto-regenerate it.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QcFrameImageRequest"
+      responses:
+        "200":
+          description: QC verdict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QcFrameImageResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+  /storage/uploads/request-url:
+    post:
+      operationId: requestUploadUrl
+      tags: [storage]
+      summary: Request a presigned URL for direct file upload
+      description: |
+        Returns a presigned GCS URL for direct upload from the client.
+        The body sent here is JSON metadata only (name, size, contentType) —
+        NEVER the file bytes. After receiving the response, PUT the file
+        directly to `uploadURL` and persist `objectPath` in your DB.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadMetadata"
+      responses:
+        "200":
+          description: Presigned upload URL generated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadUrlInfo"
+        "400":
+          description: Missing or invalid required fields.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+        "500":
+          description: Failed to generate upload URL.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+  /cinema-image:
+    post:
+      operationId: generateCinemaImage
+      tags: [ai]
+      summary: Generate a single Cinema Image Studio still. Wraps the full structured camera/lens/recipe/sliders/output state in a hand-tuned cinematography prompt template, requests Gemini 2.5 Flash Image with the chosen aspect ratio, and saves the result to object storage.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CinemaImageRequest"
+      responses:
+        "200":
+          description: Generated cinema still
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CinemaImageResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+  /cinema-prompt-score:
+    post:
+      operationId: scoreCinemaPrompt
+      tags: [ai]
+      summary: Run AI Director prompt grading. Sends the user prompt and the structured cinema config to Claude (haiku) and returns a 0-10 score across 8 axes plus an improved prompt.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CinemaPromptScoreRequest"
+      responses:
+        "200":
+          description: Prompt score and improved rewrite
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CinemaPromptScoreResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+  /regenerate-character-image:
+    post:
+      operationId: regenerateCharacterImage
+      tags: [ai]
+      summary: Re-generate the reference sheet for a SINGLE character with optional user-provided custom prompt and / or a reference photo. Returns the same shape as one entry in /generate-character-images.images[].
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegenerateCharacterImageRequest"
+      responses:
+        "200":
+          description: Newly generated single character reference sheet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CharacterImageResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+  /video-studio/jobs:
+    post:
+      operationId: createVideoStudioJob
+      tags: [video-studio]
+      summary: Start an AI Video Studio job using a story from the Story Builder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VideoStudioJobRequest"
+      responses:
+        "202":
+          description: Job accepted; client should poll GET /video-studio/jobs/{id} for progress
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VideoStudioJobStatus"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+  /video-studio/jobs/{id}:
+    get:
+      operationId: getVideoStudioJob
+      tags: [video-studio]
+      summary: Get current status snapshot for a video studio job (poll target)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Current status snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VideoStudioJobStatus"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+  /video-studio/jobs/{id}/cancel:
+    post:
+      operationId: cancelVideoStudioJob
+      tags: [video-studio]
+      summary: Cancel a running video studio job
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Job cancelled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VideoStudioJobStatus"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiError"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    AiError:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    StoryAct:
+      type: object
+      properties:
+        actNumber:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        keyMoment:
+          type: string
+      required:
+        - actNumber
+        - title
+        - description
+        - keyMoment
+    StoryCharacter:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+      required:
+        - name
+        - description
+    StoryResponse:
+      type: object
+      properties:
+        title:
+          type: string
+        synopsis:
+          type: string
+        acts:
+          type: array
+          items:
+            $ref: "#/components/schemas/StoryAct"
+        characters:
+          type: array
+          items:
+            $ref: "#/components/schemas/StoryCharacter"
+        mood:
+          type: string
+        colorPalette:
+          type: array
+          items:
+            type: string
+          description: List of hex color strings, e.g. ["#1a1a1a", "#E8FF47"]
+        musicSuggestion:
+          type: string
+        commentary:
+          type: string
+          description: "A short 2-3 sentence chat-style note from the AI explaining the most important creative choices in this story (the hook, the visual signature, the emotional arc, or what just changed if this was a refinement). Optional — older clients will fall back to a generic message."
+      required:
+        - title
+        - synopsis
+        - acts
+        - characters
+        - mood
+        - colorPalette
+        - musicSuggestion
+    StoryRequest:
+      type: object
+      properties:
+        brief:
+          type: string
+          minLength: 1
+          maxLength: 4000
+        genre:
+          type: string
+          minLength: 1
+          maxLength: 80
+        duration:
+          type: number
+          minimum: 5
+          maximum: 3600
+          description: Total target duration in seconds (kept for backward compatibility, equivalent to totalDurationSeconds)
+        totalDurationSeconds:
+          type: number
+          minimum: 5
+          maximum: 3600
+          description: Total target duration in seconds
+        partsCount:
+          type: integer
+          minimum: 1
+          maximum: 240
+          description: Number of 15-second video parts (Math.ceil(totalDurationSeconds/15))
+        style:
+          type: string
+          maxLength: 120
+          description: Visual style name, e.g. "Live Action Cinematic"
+        voiceoverLanguage:
+          type: string
+          enum: [none, english, hindi, hinglish]
+          description: Language to write the voiceover in, or "none" to skip
+      required:
+        - brief
+        - genre
+        - duration
+    ContinueStoryRequest:
+      type: object
+      properties:
+        existingStory:
+          $ref: "#/components/schemas/StoryResponse"
+        direction:
+          type: string
+          minLength: 1
+          maxLength: 2000
+      required:
+        - existingStory
+        - direction
+
+    VideoShot:
+      type: object
+      properties:
+        shotNumber:
+          type: integer
+        timestamp:
+          type: string
+          description: e.g. "00:00-00:03"
+        name:
+          type: string
+        effects:
+          type: array
+          items:
+            type: string
+        description:
+          type: string
+        cameraWork:
+          type: string
+        speed:
+          type: string
+        transition:
+          type: string
+        isSignature:
+          type: boolean
+        sceneDescription:
+          type: string
+          nullable: true
+          description: Optional FRAMES-spec per-shot scene breakdown — a 2-4 sentence cinematic paragraph describing exactly what is on screen during this shot (subject + action + composition + lighting + atmosphere). Populated when frameSettings.sceneBreakdownEnabled is true.
+      required:
+        - shotNumber
+        - timestamp
+        - name
+        - effects
+        - description
+        - cameraWork
+        - speed
+        - transition
+        - isSignature
+    VideoFramePrompt:
+      type: object
+      properties:
+        prompt:
+          type: string
+          description: A single self-contained Seedance image prompt (4-8 sentences) describing exactly the framing, subject pose, lighting, lens, and atmosphere for this anchor frame. Pasted into Seedance image-gen to render the still.
+      required:
+        - prompt
+    VideoEffectInventoryItem:
+      type: object
+      properties:
+        name:
+          type: string
+        usedCount:
+          type: integer
+        shots:
+          type: array
+          items:
+            type: integer
+        role:
+          type: string
+      required:
+        - name
+        - usedCount
+        - shots
+        - role
+    VideoDensityBlock:
+      type: object
+      properties:
+        timeRange:
+          type: string
+        density:
+          type: string
+          description: "HIGH | MEDIUM | LOW"
+        effects:
+          type: array
+          items:
+            type: string
+        count:
+          type: integer
+        duration:
+          type: string
+      required:
+        - timeRange
+        - density
+        - effects
+        - count
+        - duration
+    VideoEnergyArc:
+      type: object
+      properties:
+        act1:
+          type: string
+        act2:
+          type: string
+        act3:
+          type: string
+      required:
+        - act1
+        - act2
+        - act3
+    VideoAudioSummary:
+      type: object
+      properties:
+        voiceoverIncluded:
+          type: boolean
+        bgmIncluded:
+          type: boolean
+        keySyncPoints:
+          type: array
+          items:
+            type: string
+      required:
+        - voiceoverIncluded
+        - bgmIncluded
+        - keySyncPoints
+    VideoPromptsResponse:
+      type: object
+      properties:
+        shots:
+          type: array
+          items:
+            $ref: "#/components/schemas/VideoShot"
+        effectsInventory:
+          type: array
+          items:
+            $ref: "#/components/schemas/VideoEffectInventoryItem"
+        densityMap:
+          type: array
+          items:
+            $ref: "#/components/schemas/VideoDensityBlock"
+        energyArc:
+          $ref: "#/components/schemas/VideoEnergyArc"
+        lastFrameDescription:
+          type: string
+        copyablePrompt:
+          type: string
+        autoVoiceoverScript:
+          type: string
+          nullable: true
+          description: VO script written by the model when voiceoverLanguage was set in the request
+        audioSummary:
+          $ref: "#/components/schemas/VideoAudioSummary"
+        startingFrame:
+          allOf:
+            - $ref: "#/components/schemas/VideoFramePrompt"
+          nullable: true
+          description: Optional FRAMES-spec starting-frame Seedance image prompt for this part. Populated when frameSettings.startingFrameEnabled is true.
+        endingFrame:
+          allOf:
+            - $ref: "#/components/schemas/VideoFramePrompt"
+          nullable: true
+          description: Optional FRAMES-spec ending-frame Seedance image prompt for this part. Populated when frameSettings.endingFrameEnabled is true.
+        promptMode:
+          type: string
+          enum: [normal, json]
+          description: Which mode the model produced this prompt in. "normal" = human-readable structured text, "json" = JSON-stringified Seedance prompt envelope.
+      required:
+        - shots
+        - effectsInventory
+        - densityMap
+        - energyArc
+        - lastFrameDescription
+        - copyablePrompt
+
+    FrameSettings:
+      type: object
+      description: Per-project toggles controlling whether the model produces starting-frame, ending-frame, and per-shot scene-breakdown content. Defaults are all true.
+      properties:
+        startingFrameEnabled:
+          type: boolean
+        endingFrameEnabled:
+          type: boolean
+        sceneBreakdownEnabled:
+          type: boolean
+      required:
+        - startingFrameEnabled
+        - endingFrameEnabled
+        - sceneBreakdownEnabled
+
+    ReferenceImage:
+      type: object
+      description: A character / location / style reference image (auto-generated character sheet OR user upload). Sent inline as base64 to the model so it can build a visually-consistent prompt.
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+        kind:
+          type: string
+          enum: [character, location, style]
+        source:
+          type: string
+          enum: [auto, upload]
+          description: "auto = generated by /generate-character-images; upload = user-uploaded"
+        b64Json:
+          type: string
+          description: Base64-encoded PNG/JPEG bytes (no data URL prefix)
+        mimeType:
+          type: string
+          description: e.g. "image/png" or "image/jpeg"
+      required:
+        - name
+        - kind
+        - source
+        - b64Json
+        - mimeType
+
+    PromptMode:
+      type: string
+      enum: [normal, json]
+      description: Output format for the Seedance copyablePrompt. "normal" = human-readable structured text. "json" = JSON-stringified Seedance prompt envelope (recommended — Seedance 2.0 parses it more reliably).
+
+    AspectRatio:
+      type: string
+      enum: ["16:9", "9:16", "1:1", "4:3", "3:4", "21:9"]
+      description: Target aspect ratio for the rendered video and any reference frame stills. The video-prompt writer is told the ratio so framing instructions match it, and Gemini image generation is requested at the same ratio so the still you see in the prompts page is what the final video will look like. Defaults to "16:9" when omitted.
+
+    VideoModel:
+      type: string
+      enum:
+        - seedance-2.0
+        - veo-3
+        - kling-2.1
+        - sora
+        - runway-gen-4
+        - luma-ray-2
+        - hailuo-02
+        - pika-2.0
+      description: |
+        Target AI video generation model. The writer adapts prompt dialect, recommended length, and physics-realism guidance to the selected model. Defaults to "seedance-2.0" when omitted.
+        Per-model max single-clip duration (used to derive the duration pills the UI offers): seedance-2.0 2-15s, veo-3 2-8s, kling-2.1 5-10s, sora 5-20s, runway-gen-4 5-10s, luma-ray-2 5-9s, hailuo-02 6-10s, pika-2.0 5-10s.
+
+    VideoPromptsRequest:
+      type: object
+      properties:
+        story:
+          $ref: "#/components/schemas/StoryResponse"
+        style:
+          type: string
+          minLength: 1
+          maxLength: 120
+        videoModel:
+          $ref: "#/components/schemas/VideoModel"
+          description: When set, the writer adapts copyablePrompt dialect (Seedance bracket+sections, Veo natural prose, Kling motion-precise verbs, etc.) to the selected target. Defaults to "seedance-2.0" when omitted.
+        framesAsImageReferences:
+          type: boolean
+          description: |
+            When true, the writer assumes the user will paste the part's starting frame (Image 1) and ending frame (Image 2) into the target model alongside the copyablePrompt. The writer then embeds an explicit "FIRST FRAME = Image 1, LAST FRAME = Image 2" instruction in copyablePrompt (and as `imageToImage` inside the JSON envelope) so the model treats them as keyframe anchors. Defaults to false.
+        duration:
+          type: number
+          minimum: 1
+          maximum: 3600
+          description: Duration of this single part in seconds (a "part" is one chunk of a longer multi-part video, so it can be longer than what a single clip from the selected target model can produce — the writer will still write per-part shots that sum to this duration)
+        part:
+          type: integer
+          minimum: 1
+          maximum: 240
+        totalParts:
+          type: integer
+          minimum: 1
+          maximum: 240
+        previousLastFrame:
+          type: string
+          maxLength: 4000
+          description: lastFrameDescription from the previous part for continuation
+        previousParts:
+          type: array
+          items:
+            type: string
+          description: |
+            One compact text digest per already-generated part (parts 1..N-1), in order.
+            Each entry should summarize that part's shots, voiceover script, effects,
+            and last frame so the model has full memory of what was already shown
+            and can avoid repetition / maintain cumulative continuity.
+        voiceoverLanguage:
+          type: string
+          nullable: true
+          enum: [english, hindi, hinglish, null]
+          description: When set, Claude auto-writes a part-specific VO
+        voiceoverTone:
+          type: string
+          nullable: true
+          maxLength: 80
+        voiceoverScript:
+          type: string
+          nullable: true
+          maxLength: 4000
+          description: Optional pre-written script for this part. If absent and voiceoverLanguage is set, the model writes one.
+        bgmStyle:
+          type: string
+          nullable: true
+          maxLength: 120
+        bgmTempo:
+          type: string
+          nullable: true
+          maxLength: 40
+        bgmInstruments:
+          type: array
+          maxItems: 20
+          items:
+            type: string
+            maxLength: 60
+        mode:
+          $ref: "#/components/schemas/PromptMode"
+          description: When omitted defaults to "json".
+        frameSettings:
+          $ref: "#/components/schemas/FrameSettings"
+          description: When omitted, all three flags default to true.
+        referenceImages:
+          type: array
+          maxItems: 5
+          description: Up to 5 inline reference images (auto-generated char sheets + user uploads). Each image is sent as a content block alongside the user prompt so Claude can build visually-consistent prompts.
+          items:
+            $ref: "#/components/schemas/ReferenceImage"
+        aspectRatio:
+          $ref: "#/components/schemas/AspectRatio"
+          description: When set, the writer is instructed to phrase framing/composition for this aspect ratio (default 16:9 if omitted).
+      required:
+        - story
+        - style
+        - duration
+        - part
+        - totalParts
+
+    EditVideoPromptsRequest:
+      type: object
+      properties:
+        story:
+          $ref: "#/components/schemas/StoryResponse"
+        style:
+          type: string
+          minLength: 1
+          maxLength: 120
+        videoModel:
+          $ref: "#/components/schemas/VideoModel"
+          description: When set, the refined copyablePrompt is rewritten in the dialect of the selected target model. Defaults to "seedance-2.0" when omitted.
+        framesAsImageReferences:
+          type: boolean
+          description: When true, the refined copyablePrompt embeds the explicit "FIRST FRAME = Image 1, LAST FRAME = Image 2" instruction so the user can paste the rendered starting/ending stills as keyframe anchors into the target model.
+        duration:
+          type: number
+          minimum: 1
+          maximum: 3600
+          description: Duration of this single part in seconds (matches the per-part duration the original part was generated with)
+        part:
+          type: integer
+          minimum: 1
+          maximum: 240
+        totalParts:
+          type: integer
+          minimum: 1
+          maximum: 240
+        instruction:
+          type: string
+          description: The writer's edit instruction (e.g. "make shot 3 slower", "swap the signature effect to a whip pan", "drop the third shot entirely")
+        existingPart:
+          $ref: "#/components/schemas/VideoPromptsResponse"
+        previousLastFrame:
+          type: string
+          nullable: true
+          description: lastFrameDescription from the previous part — the FIRST shot of the refined part must continue from this frame.
+        previousParts:
+          type: array
+          items:
+            type: string
+          description: |
+            Compact text digests of all OTHER already-generated parts (parts 1..N-1, excluding the part being edited),
+            in order, so the model has cumulative memory of what was already shown across the project and avoids
+            inadvertently breaking continuity beyond just the immediate neighbours.
+        nextFirstShot:
+          type: string
+          nullable: true
+          description: One-line description of the FIRST shot of the next part — the refined part's lastFrameDescription must end in a state that allows that next shot to enter seamlessly. Omit when refining the final part.
+        voiceoverLanguage:
+          type: string
+          nullable: true
+        voiceoverTone:
+          type: string
+          nullable: true
+        voiceoverScript:
+          type: string
+          nullable: true
+        bgmStyle:
+          type: string
+          nullable: true
+        bgmTempo:
+          type: string
+          nullable: true
+        bgmInstruments:
+          type: array
+          items:
+            type: string
+        mode:
+          $ref: "#/components/schemas/PromptMode"
+          description: When omitted defaults to "json".
+        frameSettings:
+          $ref: "#/components/schemas/FrameSettings"
+        referenceImages:
+          type: array
+          maxItems: 5
+          items:
+            $ref: "#/components/schemas/ReferenceImage"
+        aspectRatio:
+          $ref: "#/components/schemas/AspectRatio"
+          description: When set, the writer is instructed to phrase framing/composition for this aspect ratio (default 16:9 if omitted).
+      required:
+        - story
+        - style
+        - duration
+        - part
+        - totalParts
+        - instruction
+        - existingPart
+
+    AdjustPromptRequest:
+      type: object
+      properties:
+        copyablePrompt:
+          type: string
+          minLength: 1
+          maxLength: 30000
+        mode:
+          $ref: "#/components/schemas/PromptMode"
+        targetMin:
+          type: integer
+          minimum: 500
+          maximum: 10000
+          description: Lower edge of the desired character band. Defaults to 4200.
+        targetMax:
+          type: integer
+          minimum: 500
+          maximum: 10000
+          description: Upper edge of the desired character band. Defaults to 4500.
+        videoModel:
+          $ref: "#/components/schemas/VideoModel"
+          description: Writer-selected target video model. The expand/trim instructions reference this model name (e.g. "EXPAND this Veo 3 video prompt...") instead of a hardcoded default. Defaults to "seedance-2.0" when omitted.
+      required:
+        - copyablePrompt
+    AdjustPromptResponse:
+      type: object
+      properties:
+        copyablePrompt:
+          type: string
+        characterCount:
+          type: integer
+        mode:
+          $ref: "#/components/schemas/PromptMode"
+      required:
+        - copyablePrompt
+        - characterCount
+
+    MusicPartDirection:
+      type: object
+      properties:
+        part:
+          type: integer
+        musicDirection:
+          type: string
+      required:
+        - part
+        - musicDirection
+    MusicBriefResponse:
+      type: object
+      properties:
+        genre:
+          type: string
+        subGenre:
+          type: string
+        tempo:
+          type: string
+        energy:
+          type: string
+          description: "low | medium | high | explosive"
+        instruments:
+          type: array
+          items:
+            type: string
+        mood:
+          type: string
+        vocalStyle:
+          type: string
+          nullable: true
+        referenceArtists:
+          type: array
+          items:
+            type: string
+        sunoPrompt:
+          type: string
+        udioPrompt:
+          type: string
+        timingNotes:
+          type: string
+        partBreakdown:
+          type: array
+          items:
+            $ref: "#/components/schemas/MusicPartDirection"
+      required:
+        - genre
+        - subGenre
+        - tempo
+        - energy
+        - instruments
+        - mood
+        - referenceArtists
+        - sunoPrompt
+        - udioPrompt
+        - timingNotes
+        - partBreakdown
+    MusicBriefRequest:
+      type: object
+      properties:
+        story:
+          $ref: "#/components/schemas/StoryResponse"
+        style:
+          type: string
+          minLength: 1
+          maxLength: 120
+        mood:
+          type: string
+          minLength: 1
+          maxLength: 200
+        duration:
+          type: number
+          minimum: 5
+          maximum: 3600
+        language:
+          type: string
+          enum: [english, hindi, hinglish]
+        energyLevel:
+          type: integer
+          minimum: 1
+          maximum: 10
+          description: 1-10 scale
+        tempo:
+          type: string
+          enum: [slow, medium, fast, very_fast]
+        totalParts:
+          type: integer
+          minimum: 1
+          maximum: 240
+      required:
+        - story
+        - style
+        - mood
+        - duration
+        - language
+
+    VoiceoverAlternateVersion:
+      type: object
+      properties:
+        label:
+          type: string
+        script:
+          type: string
+      required:
+        - label
+        - script
+    VoiceoverResponse:
+      type: object
+      properties:
+        language:
+          type: string
+          description: "english | hindi | hinglish"
+        script:
+          type: string
+        wordCount:
+          type: integer
+        estimatedDuration:
+          type: string
+        tone:
+          type: string
+        deliveryNotes:
+          type: string
+        emphasisWords:
+          type: array
+          items:
+            type: string
+        alternateVersions:
+          type: array
+          items:
+            $ref: "#/components/schemas/VoiceoverAlternateVersion"
+        elevenlabsPrompt:
+          type: string
+        copyableScript:
+          type: string
+      required:
+        - language
+        - script
+        - wordCount
+        - estimatedDuration
+        - tone
+        - deliveryNotes
+        - emphasisWords
+        - alternateVersions
+        - elevenlabsPrompt
+        - copyableScript
+    VoiceoverRequest:
+      type: object
+      properties:
+        story:
+          $ref: "#/components/schemas/StoryResponse"
+        style:
+          type: string
+          maxLength: 120
+        language:
+          type: string
+          enum: [english, hindi, hinglish]
+        tone:
+          type: string
+          minLength: 1
+          maxLength: 60
+        duration:
+          type: number
+          minimum: 1
+          maximum: 600
+        part:
+          type: integer
+          minimum: 1
+          maximum: 240
+        pace:
+          type: string
+          enum: [slow, normal, fast]
+      required:
+        - story
+        - language
+        - tone
+        - duration
+        - part
+
+    CharacterImageRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+        description:
+          type: string
+          minLength: 1
+          maxLength: 1500
+      required:
+        - name
+        - description
+    CharacterImagesRequest:
+      type: object
+      properties:
+        characters:
+          type: array
+          minItems: 1
+          maxItems: 12
+          items:
+            $ref: "#/components/schemas/CharacterImageRequest"
+        style:
+          type: string
+          maxLength: 200
+          description: Visual style of the project (e.g. "Live Action Cinematic", "Cartoon Animation"). Used to keep the character look consistent with the rest of the production.
+        aspectRatio:
+          $ref: "#/components/schemas/AspectRatio"
+          description: Aspect ratio for the reference sheet image. Defaults to 16:9 — the 3-panel composite is laid out side-by-side and reads cleanest in landscape regardless of the final video ratio.
+      required:
+        - characters
+        - style
+    CharacterImageResult:
+      type: object
+      properties:
+        name:
+          type: string
+        objectPath:
+          type: string
+          description: Path to the generated image in object storage (e.g. "/objects/uploads/<uuid>"). Fetch via GET /api/storage/objects/<id>.
+        mimeType:
+          type: string
+          description: e.g. "image/png" or "image/jpeg"
+        generatedAt:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp the image was generated and saved.
+      required:
+        - name
+        - objectPath
+        - mimeType
+        - generatedAt
+    CharacterImageError:
+      type: object
+      properties:
+        name:
+          type: string
+        message:
+          type: string
+      required:
+        - name
+        - message
+    CharacterImagesResponse:
+      type: object
+      properties:
+        images:
+          type: array
+          items:
+            $ref: "#/components/schemas/CharacterImageResult"
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/CharacterImageError"
+      required:
+        - images
+        - errors
+    GenerateFrameImageReference:
+      type: object
+      description: Optional character reference sheet image. Server fetches the bytes from object storage and forwards them inline to Gemini so the resulting frame still keeps faces / wardrobe consistent with the cast.
+      properties:
+        objectPath:
+          type: string
+          description: Object storage path of the reference image (e.g. "/objects/uploads/<uuid>").
+          minLength: 1
+        mimeType:
+          type: string
+          description: e.g. "image/png", "image/jpeg"
+          minLength: 1
+          maxLength: 64
+      required:
+        - objectPath
+        - mimeType
+    GenerateFrameImageRequest:
+      type: object
+      description: Generate a single film-still frame for a video part. The writer's `framePrompt` is wrapped server-side in an instruction template that locks the visual style and forbids reference-sheet output.
+      properties:
+        framePrompt:
+          type: string
+          minLength: 1
+          maxLength: 4000
+          description: The starting- or ending-frame prompt produced by the writer for a given video part.
+        style:
+          type: string
+          maxLength: 200
+          description: Visual style of the project (e.g. "Live Action Cinematic"). Used to keep the frame consistent with the rest of the production.
+        characterReferences:
+          type: array
+          maxItems: 8
+          description: Optional cast reference sheets to inject so faces stay on-model.
+          items:
+            $ref: "#/components/schemas/GenerateFrameImageReference"
+        aspectRatio:
+          $ref: "#/components/schemas/AspectRatio"
+          description: Aspect ratio of the generated frame still. Should match the project's video aspect ratio so what the user sees here matches the final render. Defaults to 16:9.
+      required:
+        - framePrompt
+        - style
+    GenerateFrameImageResult:
+      type: object
+      properties:
+        objectPath:
+          type: string
+          description: Path to the generated still in object storage (e.g. "/objects/uploads/<uuid>"). Fetch via GET /api/storage/objects/<id>.
+        mimeType:
+          type: string
+          description: e.g. "image/png" or "image/jpeg"
+        generatedAt:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp the image was generated and saved.
+      required:
+        - objectPath
+        - mimeType
+        - generatedAt
+    QcFrameImageRequest:
+      type: object
+      description: Ask Gemini Vision to grade a generated frame still against the writer's prompt + cast references. The server fetches the candidate frame and any references from object storage just-in-time.
+      properties:
+        objectPath:
+          type: string
+          minLength: 1
+          description: Object-storage path of the frame still to QC (e.g. "/objects/uploads/<uuid>").
+        framePrompt:
+          type: string
+          minLength: 1
+          maxLength: 4000
+          description: The original writer prompt the image was meant to depict.
+        style:
+          type: string
+          maxLength: 200
+          description: Visual style of the project (e.g. "Live Action Cinematic"). Used as additional QC context.
+        characterReferences:
+          type: array
+          maxItems: 8
+          description: Optional cast reference sheets. When provided, QC also scores likeness adherence.
+          items:
+            $ref: "#/components/schemas/GenerateFrameImageReference"
+        aspectRatio:
+          $ref: "#/components/schemas/AspectRatio"
+          description: When provided, QC also confirms the still appears to be in the requested aspect ratio.
+      required:
+        - objectPath
+        - framePrompt
+        - style
+    QcFrameImageResult:
+      type: object
+      description: Structured QC verdict. `passed=true` means the frame is good enough to ship; otherwise the client may auto-regenerate using `suggestion` as a hint.
+      properties:
+        score:
+          type: number
+          minimum: 0
+          maximum: 10
+          description: 0-10 adherence score (10 = perfect match).
+        passed:
+          type: boolean
+          description: Convenience flag — true when score >= the server's pass threshold (currently 7).
+        issues:
+          type: array
+          items:
+            type: string
+          description: Short bullet list of problems the QC reviewer noticed. Empty when passed.
+        suggestion:
+          type: string
+          description: One-sentence regen hint the client can append to the frame prompt on retry. Empty when passed.
+      required:
+        - score
+        - passed
+        - issues
+        - suggestion
+    RegenerateCharacterImageReference:
+      type: object
+      description: Optional user-uploaded reference image. Sent inline as base64 to Gemini so the new sheet preserves likeness from the photo.
+      properties:
+        b64Json:
+          type: string
+          description: Base64-encoded image bytes (no data URL prefix). Caller must keep total request body under ~8MB.
+          minLength: 1
+        mimeType:
+          type: string
+          description: e.g. "image/png", "image/jpeg", "image/webp"
+          minLength: 1
+          maxLength: 64
+      required:
+        - b64Json
+        - mimeType
+    RegenerateCharacterImageRequest:
+      type: object
+      description: Re-generate the reference sheet for a SINGLE character, optionally with custom user guidance and / or a reference photo.
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+        description:
+          type: string
+          maxLength: 1500
+          description: Original character description from the story. Used to keep the new sheet anchored to the story's character.
+        customPrompt:
+          type: string
+          maxLength: 1500
+          description: Optional user guidance — wardrobe tweaks, age, mood, etc. Appended to the base sheet prompt.
+        referenceImage:
+          $ref: "#/components/schemas/RegenerateCharacterImageReference"
+        style:
+          type: string
+          maxLength: 200
+          description: Visual style of the project, used to keep the new sheet on-brand.
+        aspectRatio:
+          $ref: "#/components/schemas/AspectRatio"
+          description: Aspect ratio for the regenerated reference sheet. Defaults to 16:9 to match the auto-generated sheets.
+      required:
+        - name
+        - style
+    CinemaStyleMode:
+      type: string
+      enum:
+        - photoreal_cinematic
+        - anime_2d
+        - pixel_art
+        - cgi_3d
+        - commercial_product
+      description: Top-level visual style mode. Drives the camera-language translation layer (e.g. real focal lengths for photoreal, anime composition language for 2D anime).
+    CinemaOutputAspectRatio:
+      type: string
+      enum:
+        - "16:9"
+        - "9:16"
+        - "1:1"
+        - "4:5"
+        - "3:4"
+        - "21:9"
+        - "2.39:1"
+        - "4:3"
+        - "3:2"
+      description: Output aspect ratio shown to the user in the Output panel. Cinema Studio generates with Nano Banana 2 (gemini-3.1-flash-image-preview), which natively supports 1:1, 3:4, 4:3, 9:16, 16:9, 4:5, 3:2, and 21:9. Only the cinematic 2.39:1 anamorphic ratio is remapped to the nearest neighbour (21:9 ≈ 2.33:1) at generation time; the user-requested ratio is always preserved in the saved prompt for reproducibility.
+    CinemaResolution:
+      type: string
+      enum: [standard, high, ultra]
+    CinemaFormat:
+      type: string
+      enum: [png, jpg, webp]
+      description: Requested output format. Today the server always returns PNG; jpg/webp are accepted and recorded in the response for forward-compatibility.
+    CinemaShotRecipe:
+      type: object
+      description: Inline shot recipe (built-in or user-saved). Sent inline so custom recipes work without server-side persistence.
+      properties:
+        name:
+          type: string
+          maxLength: 80
+        cameraAngle:
+          type: string
+          maxLength: 80
+        shotSize:
+          type: string
+          maxLength: 80
+        lens:
+          type: string
+          maxLength: 80
+        lighting:
+          type: string
+          maxLength: 200
+        composition:
+          type: string
+          maxLength: 200
+        promptBoost:
+          type: string
+          maxLength: 400
+    CinemaReferenceStrength:
+      type: object
+      description: 0-100 sliders that tell the model how strictly to lock to each reference dimension. Sent through into the prompt instruction template.
+      properties:
+        faceLock: { type: integer, minimum: 0, maximum: 100 }
+        outfitLock: { type: integer, minimum: 0, maximum: 100 }
+        poseLock: { type: integer, minimum: 0, maximum: 100 }
+        styleLock: { type: integer, minimum: 0, maximum: 100 }
+        locationLock: { type: integer, minimum: 0, maximum: 100 }
+        lightingLock: { type: integer, minimum: 0, maximum: 100 }
+        productShapeLock: { type: integer, minimum: 0, maximum: 100 }
+        compositionLock: { type: integer, minimum: 0, maximum: 100 }
+    CinemaGenerationControls:
+      type: object
+      description: 0-100 generation sliders + seed control.
+      properties:
+        seed:
+          type: integer
+          minimum: -1
+          maximum: 2147483647
+          description: -1 means "random / let model pick".
+        randomSeed:
+          type: boolean
+        variationStrength: { type: integer, minimum: 0, maximum: 100 }
+        creativeFreedom: { type: integer, minimum: 0, maximum: 100 }
+        promptAdherence: { type: integer, minimum: 0, maximum: 100 }
+        realismStrength: { type: integer, minimum: 0, maximum: 100 }
+        styleStrength: { type: integer, minimum: 0, maximum: 100 }
+        detailLevel: { type: integer, minimum: 0, maximum: 100 }
+        compositionStrictness: { type: integer, minimum: 0, maximum: 100 }
+    CinemaOutputControls:
+      type: object
+      properties:
+        aspectRatio:
+          $ref: "#/components/schemas/CinemaOutputAspectRatio"
+        resolution:
+          $ref: "#/components/schemas/CinemaResolution"
+        imageCount:
+          type: integer
+          enum: [1, 2, 4]
+        format:
+          $ref: "#/components/schemas/CinemaFormat"
+    CinemaReference:
+      type: object
+      description: Reference image already saved in object storage (e.g. via the Storage upload flow). The server fetches and inlines it before generation.
+      properties:
+        objectPath:
+          type: string
+          minLength: 1
+        mimeType:
+          type: string
+          minLength: 1
+          maxLength: 64
+        label:
+          type: string
+          maxLength: 80
+      required:
+        - objectPath
+        - mimeType
+    CinemaImageRequest:
+      type: object
+      description: Full Cinema Image Studio request — combines the user's natural-language prompt with the structured camera/lens/recipe/slider/output state into a single image generation call.
+      properties:
+        rawPrompt:
+          type: string
+          minLength: 1
+          maxLength: 4000
+        styleMode:
+          $ref: "#/components/schemas/CinemaStyleMode"
+        cameraBodyId:
+          type: string
+          maxLength: 80
+          nullable: true
+        cameraBodyLabel:
+          type: string
+          maxLength: 120
+          description: User-facing camera label (e.g. "ARRI Alexa 35 Inspired Look"). Used in the prompt envelope when the camera body lookup is not available.
+        cameraInjection:
+          type: string
+          maxLength: 600
+          description: Pre-built camera body prompt fragment.
+        lensPackId:
+          type: string
+          maxLength: 80
+          nullable: true
+        lensPackLabel:
+          type: string
+          maxLength: 120
+        lensInjection:
+          type: string
+          maxLength: 600
+          description: Pre-built lens pack prompt fragment.
+        focalLength:
+          type: string
+          maxLength: 80
+        aperture:
+          type: string
+          maxLength: 40
+        shotRecipe:
+          $ref: "#/components/schemas/CinemaShotRecipe"
+        referenceStrength:
+          $ref: "#/components/schemas/CinemaReferenceStrength"
+        generationControls:
+          $ref: "#/components/schemas/CinemaGenerationControls"
+        outputControls:
+          $ref: "#/components/schemas/CinemaOutputControls"
+        references:
+          type: array
+          maxItems: 8
+          items:
+            $ref: "#/components/schemas/CinemaReference"
+        negativePrompt:
+          type: array
+          maxItems: 32
+          items:
+            type: string
+            maxLength: 80
+        styleTranslation:
+          type: string
+          maxLength: 1000
+          description: Pre-computed style-translated camera language. The client can compute this with full UI context; if omitted, the server falls back to a sensible default for the style mode.
+      required:
+        - rawPrompt
+        - styleMode
+        - outputControls
+    CinemaImageResponse:
+      type: object
+      properties:
+        objectPath:
+          type: string
+        mimeType:
+          type: string
+        generatedAt:
+          type: string
+          format: date-time
+        seed:
+          type: integer
+          description: The seed used for this generation. When the request used randomSeed=true, this is the random seed the server generated.
+        finalPrompt:
+          type: string
+          description: The fully assembled prompt string sent to the image model. Useful for debug + "view prompt" features.
+      required:
+        - objectPath
+        - mimeType
+        - generatedAt
+        - seed
+        - finalPrompt
+    CinemaPromptScoreRequest:
+      type: object
+      properties:
+        rawPrompt:
+          type: string
+          minLength: 1
+          maxLength: 4000
+        configSummary:
+          type: string
+          maxLength: 4000
+          description: Short human-readable summary of the camera / lens / recipe / sliders the user has selected, so the grader can score how well the prompt aligns with the configured shot.
+      required:
+        - rawPrompt
+    CinemaPromptScoreResponse:
+      type: object
+      properties:
+        overallPromptScore: { type: number, minimum: 0, maximum: 10 }
+        cinematicScore: { type: number, minimum: 0, maximum: 10 }
+        cameraClarityScore: { type: number, minimum: 0, maximum: 10 }
+        lensClarityScore: { type: number, minimum: 0, maximum: 10 }
+        lightingScore: { type: number, minimum: 0, maximum: 10 }
+        styleConsistencyScore: { type: number, minimum: 0, maximum: 10 }
+        characterConsistencyScore: { type: number, minimum: 0, maximum: 10 }
+        compositionScore: { type: number, minimum: 0, maximum: 10 }
+        promptRiskScore:
+          type: number
+          minimum: 0
+          maximum: 10
+          description: 0 = safe, 10 = high risk of being blocked / failing.
+        missingDetails:
+          type: array
+          maxItems: 16
+          items:
+            type: string
+        improvementSuggestions:
+          type: array
+          maxItems: 16
+          items:
+            type: string
+        improvedPrompt:
+          type: string
+          maxLength: 4000
+      required:
+        - overallPromptScore
+        - cinematicScore
+        - cameraClarityScore
+        - lensClarityScore
+        - lightingScore
+        - styleConsistencyScore
+        - characterConsistencyScore
+        - compositionScore
+        - promptRiskScore
+        - missingDetails
+        - improvementSuggestions
+        - improvedPrompt
+    UploadMetadata:
+      type: object
+      required: [name, size, contentType]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Original file name.
+        size:
+          type: integer
+          minimum: 1
+          description: File size in bytes.
+        contentType:
+          type: string
+          minLength: 1
+          description: MIME type of the file (e.g. "image/jpeg").
+    UploadUrlInfo:
+      type: object
+      required: [uploadURL, objectPath]
+      properties:
+        uploadURL:
+          type: string
+          format: uri
+          description: Presigned GCS URL for PUT upload (expires in ~15 min).
+        objectPath:
+          type: string
+          description: Normalized object path (e.g. "/objects/uploads/uuid"). Persist this; serve later via GET /api/storage/objects/<id>.
+        metadata:
+          $ref: "#/components/schemas/UploadMetadata"
+    VideoStudioModel:
+      type: string
+      enum: [cont_pro, cont_ultra]
+      description: Internal video engine selection. User-facing labels are "Cont Pro" and "Cont Ultra".
+    VideoStudioAspectRatio:
+      type: string
+      enum: ["16:9", "9:16", "1:1"]
+    VideoStudioVoiceoverLanguage:
+      type: string
+      enum: [hindi, english, hinglish]
+    VideoStudioQuality:
+      type: string
+      enum: [standard, high]
+    VideoStudioJobRequest:
+      type: object
+      required: [model, durationSeconds, aspectRatio, story]
+      properties:
+        model:
+          $ref: "#/components/schemas/VideoStudioModel"
+        durationSeconds:
+          type: integer
+          enum: [15, 30, 60, 120]
+          description: Allowed values depend on model — Cont Pro 15/30/60, Cont Ultra 30/60/120.
+        aspectRatio:
+          $ref: "#/components/schemas/VideoStudioAspectRatio"
+        voiceoverEnabled:
+          type: boolean
+          default: true
+        voiceoverLanguage:
+          oneOf:
+            - $ref: "#/components/schemas/VideoStudioVoiceoverLanguage"
+            - type: "null"
+        bgmEnabled:
+          type: boolean
+          default: true
+        subtitlesEnabled:
+          type: boolean
+          default: false
+        quality:
+          allOf:
+            - $ref: "#/components/schemas/VideoStudioQuality"
+          default: standard
+        storyProjectId:
+          oneOf:
+            - type: string
+            - type: "null"
+          description: Optional ContentStudio project id this job was created from.
+        story:
+          $ref: "#/components/schemas/StoryResponse"
+    VideoStudioChunkStatus:
+      type: object
+      required: [partNumber, timeRangeStart, timeRangeEnd, status, attempts]
+      properties:
+        partNumber:
+          type: integer
+        timeRangeStart:
+          type: integer
+        timeRangeEnd:
+          type: integer
+        status:
+          type: string
+          enum: [pending, generating, complete, failed]
+        videoObjectPath:
+          oneOf:
+            - type: string
+            - type: "null"
+        lastFrameObjectPath:
+          oneOf:
+            - type: string
+            - type: "null"
+        summary:
+          oneOf:
+            - type: string
+            - type: "null"
+        attempts:
+          type: integer
+          default: 0
+        error:
+          oneOf:
+            - type: string
+            - type: "null"
+    VideoStudioJobStatus:
+      type: object
+      required:
+        - id
+        - status
+        - stage
+        - message
+        - progressPercent
+        - currentPart
+        - totalParts
+        - model
+        - durationSeconds
+        - aspectRatio
+        - createdAt
+        - chunks
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [queued, running, complete, failed, cancelled]
+        stage:
+          type: string
+        message:
+          type: string
+        progressPercent:
+          type: integer
+          minimum: 0
+          maximum: 100
+        currentPart:
+          type: integer
+        totalParts:
+          type: integer
+        model:
+          $ref: "#/components/schemas/VideoStudioModel"
+        durationSeconds:
+          type: integer
+        aspectRatio:
+          $ref: "#/components/schemas/VideoStudioAspectRatio"
+        finalVideoObjectPath:
+          oneOf:
+            - type: string
+            - type: "null"
+        thumbnailObjectPath:
+          oneOf:
+            - type: string
+            - type: "null"
+        voiceoverScript:
+          oneOf:
+            - type: string
+            - type: "null"
+        error:
+          oneOf:
+            - type: string
+            - type: "null"
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          oneOf:
+            - type: string
+              format: date-time
+            - type: "null"
+        chunks:
+          type: array
+          items:
+            $ref: "#/components/schemas/VideoStudioChunkStatus"

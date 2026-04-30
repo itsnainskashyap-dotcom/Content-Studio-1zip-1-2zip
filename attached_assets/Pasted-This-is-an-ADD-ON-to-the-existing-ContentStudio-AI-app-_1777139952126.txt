@@ -1,0 +1,297 @@
+This is an ADD-ON to the existing ContentStudio AI app. Do NOT rebuild from scratch. Only modify and extend the existing components listed below. The base app already exists with Story Builder, Prompt Generator, Music Generator, Voiceover Generator, History, and Settings pages.
+FEATURE 1 — STORY BUILDER: Video Duration & Style Selection BEFORE Generation
+What to change: src/pages/StoryBuilder.jsx
+Current flow: User types brief → selects genre → generates story.
+New flow: User types brief → selects genre → selects VIDEO DURATION → selects VISUAL STYLE → selects VOICEOVER LANGUAGE → clicks Generate Story.
+Step 1 — Add "Video Duration" selector to StoryBuilder BEFORE the Generate button
+Replace the existing duration selector with this new design:
+Label: "How long is your video?"
+Show a horizontal selector with these options as large clickable cards (not just pills):
+[ 30 sec ]  [ 1 min ]  [ 2 min ]  [ 3 min ]  [ 5 min ]  [ Custom ]
+Each card shows:
+Duration label (large, Bebas Neue)
+Sub-label showing estimated number of parts:
+30 sec → "2–3 parts @ 15s each"
+1 min → "4 parts @ 15s each"
+2 min → "8 parts @ 15s each"
+3 min → "12 parts @ 15s each"
+5 min → "20 parts @ 15s each"
+Custom → shows a number input for minutes + seconds
+"Custom" selection reveals two inputs side by side:
+[ ___ min ]  [ ___ sec ]
+Min range: 0–60. Sec range: 0–59.
+Selected card gets accent border #E8FF47 + accent background at 10% opacity.
+Store in state: totalDurationSeconds (number), partsCount (auto-calculated: Math.ceil(totalDurationSeconds / 15))
+Step 2 — Add "Visual Style" selector to StoryBuilder
+Label: "Choose your visual style"
+Show a 4-column grid of style cards. Each card has:
+A unique left-border color (each style gets its own color — see list below)
+Style name (DM Sans, 500 weight)
+3-word descriptor below name (muted color)
+Hover: slight background brighten + scale 1.01
+Styles and their border colors:
+Style
+Border Color
+Descriptor
+Live Action Cinematic
+#FF6B35
+Real. Raw. Filmic.
+Anime 2D
+#FF4D8F
+Bold. Expressive. Dynamic.
+3D Pixar Style
+#4DA6FF
+Warm. Polished. Emotive.
+Pixel Art
+#9B59B6
+Retro. Sharp. Nostalgic.
+Studio Ghibli
+#27AE60
+Painterly. Gentle. Alive.
+Cyberpunk Neon
+#00FFCC
+Electric. Dark. Futuristic.
+Dark Fantasy
+#8B0000
+Gothic. Heavy. Atmospheric.
+Claymation
+#F39C12
+Tactile. Warm. Handmade.
+Wes Anderson
+#E91E8C
+Symmetrical. Pastel. Deadpan.
+Documentary
+#95A5A6
+Natural. Honest. Vérité.
+Horror Atmospheric
+#2C2C2C
+Dread. Shadows. Unsettling.
+Music Video Hyper
+#FF0066
+Fast. Punchy. Rhythm-driven.
+Only one style selectable at a time. Selected: accent border + style's unique color as faint background tint.
+Store in state: selectedStyle (string)
+Step 3 — Add "Voiceover Language" selector to StoryBuilder
+Label: "Voiceover language" (optional — user can skip)
+Show 4 large toggle buttons in a row:
+[ No Voiceover ]  [ हिंदी ]  [ English ]  [ Hinglish ]
+"No Voiceover" selected by default
+Each button is 25% width, tall enough to be comfortable (min 48px)
+Hindi button shows Devanagari text + "(Hindi)" sub-label in small muted text
+Hinglish button shows "Hinglish" + "Hindi + English mix" sub-label
+Selected button: accent background #E8FF47, black text
+Store in state: voiceoverLanguage ("none" | "hindi" | "english" | "hinglish")
+Step 4 — Update the Generate Story button
+Button label changes based on selections:
+If no style selected: "Select a style first" (disabled, muted)
+If style selected but no duration: "Select duration first" (disabled, muted)
+If all selected: "Generate Story →" (accent, enabled)
+Show a small summary line just above the button:
+[style name] · [duration] · [voiceover language or "No voiceover"]
+Example: Live Action Cinematic · 1 min · Hinglish
+This summary uses muted text, small size, centered.
+Step 5 — Pass these values to the story generation API call
+Update POST /api/generate-story to also receive:
+{
+  "brief": "string",
+  "genre": "string",
+  "totalDurationSeconds": 60,
+  "partsCount": 4,
+  "style": "Live Action Cinematic",
+  "voiceoverLanguage": "hinglish"
+}
+Update the Claude system prompt for story generation to use these:
+Reference the style in story tone: "Write this story knowing it will be rendered as [style]. The pacing, atmosphere, and scene descriptions should feel appropriate for that visual style."
+Reference duration: "This story will be broken into [partsCount] video parts of approximately 15 seconds each. Structure your acts accordingly — each act should map to roughly [partsCount/3] parts."
+Reference voiceover language: "The voiceover will be in [voiceoverLanguage]. If Hinglish or Hindi, character names, locations, and cultural references should feel appropriate for an Indian audience."
+FEATURE 2 — STORY DISPLAY: Inline "Generate Video Prompts" Button
+What to change: src/pages/StoryBuilder.jsx — story display section
+Current: After story generates, user sees the story and has to navigate to a separate Prompt Generator page.
+New: After story generates, the full prompt generation workflow appears INLINE on the same page, below the story. No page navigation required.
+Layout after story generation:
+┌─────────────────────────────────────────────────────────┐
+│  [Story Title — large Bebas Neue]                       │
+│  [Synopsis]                                             │
+│  [Acts timeline — horizontal scroll]                    │
+│  [Characters | Mood | Color Palette | Music Suggestion] │
+├─────────────────────────────────────────────────────────┤
+│  ✓ Style: Live Action Cinematic                         │
+│  ✓ Duration: 1 min (4 parts × 15s)                     │
+│  ✓ Voiceover: Hinglish                                  │
+│                                                         │
+│  [  Regenerate Story  ]  [  ▶️ Generate Video Prompts  ] │
+└─────────────────────────────────────────────────────────┘
+The "Generate Video Prompts" button is prominent (full accent style, arrow icon).
+When "Generate Video Prompts" is clicked:
+DO NOT navigate away. Instead, below the story card, a new section slides in smoothly with transform: translateY + opacity animation (300ms ease).
+This section is titled:
+VIDEO PROMPTS  ·  [style name]  ·  [total duration]
+Inside this section, render the full prompt generation flow INLINE:
+Audio Attachment Panel (compact version — two rows):
+Row 1 — Voiceover:
+Shows: "Voiceover: [language from story settings]" as a green chip if language was set
+If language was "none": shows "Add Voiceover +" button (outline, small)
+Clicking "Add Voiceover +" opens a small inline panel to pick language + tone
+Tone selector: 6 small pill options
+Row 2 — BGM:
+Shows: "BGM: [auto-suggested based on story mood]" as a chip
+Toggle to turn off: "✕" on the chip removes it
+"Change BGM" link opens inline BGM selector (genre + tempo pills)
+Generate button: "Generate [N] Prompts" where N = partsCount
+After prompts generate (inline, same page):
+Each part appears as a card below, stacking vertically. Each card:
+┌──────────────────────────────────────────────────────────┐
+│  PART 1 / 4  ·  00:00 – 00:15  ·  Live Action Cinematic │
+│  [SIGNATURE SHOT badge if applicable]                    │
+├──────────────────────────────────────────────────────────┤
+│  Shots:  Shot 1 · Shot 2 · Shot 3 · Shot 4 (expandable) │
+├──────────────────────────────────────────────────────────┤
+│  [VOICEOVER: "Yeh woh moment hai..."]  [Hinglish chip]   │
+│  [BGM: Cinematic Orchestral · 110 BPM]                   │
+├──────────────────────────────────────────────────────────┤
+│  Density: [████████░░] HIGH                              │
+├──────────────────────────────────────────────────────────┤
+│  [  📋 Copy Full Prompt  ]  [  ↓ Download  ]             │
+└──────────────────────────────────────────────────────────┘
+Parts generate one by one with a progress bar at top:
+Generating Part 2 of 4... [████████░░░░░░░░] 50%
+Each part card appears as soon as that part finishes generating — don't wait for all parts.
+"Copy Full Prompt" button behaviour:
+Copies this exact format to clipboard:
+[VISUAL STYLE: Live Action Cinematic | film grain | anamorphic lens | photorealistic]
+[BACKGROUND MUSIC: Cinematic Orchestral | 110 BPM | intense-building | strings, percussion, piano | beat drop at 00:08]
+[VOICEOVER: "Yeh woh moment hai jo sab badal deta hai." | Hinglish | Cinematic | slow delivery, pause after last word]
+[PART: 1 of 4 | CONTINUES TO: Part 2]
+
+SHOT 1 (00:00–00:03) — [Shot Name]
+• [description]
+• VO: "Yeh woh..."
+• BGM NOTE: opening strings swell
+• [camera work]
+• [effects]
+• EXIT: [transition]
+
+SHOT 2 (00:03–00:06) — ...
+...
+
+LAST FRAME: [exact description for Part 2 to pick up from]
+FEATURE 3 — Update /api/generate-video-prompts Input
+The API now receives the voiceover and BGM data that was selected in the inline panel:
+{
+  "story": "object",
+  "style": "string — from story settings",
+  "duration": 15,
+  "part": 1,
+  "totalParts": 4,
+  "previousLastFrame": "null or string",
+  "voiceoverLanguage": "hinglish or null",
+  "voiceoverTone": "cinematic or null",
+  "bgmStyle": "Cinematic Orchestral or null",
+  "bgmTempo": "110 BPM or null",
+  "bgmInstruments": ["strings", "percussion", "piano"]
+}
+If voiceoverLanguage is not "none" and no pre-written script exists for this part, Claude auto-writes the voiceover script for that part based on the story act that maps to this part number.
+Auto-voiceover logic in system prompt:
+If voiceoverScript is not provided but voiceoverLanguage is set:
+- Look at which story act maps to this part number
+- Write a voiceover script that captures the emotional core of that act
+- Word count: duration_seconds × 2.5 words (for cinematic/slow tone) or × 3.2 (for energetic tone)
+- Language: follow the voiceoverLanguage setting exactly
+- Embed this auto-written script into the [VOICEOVER: ...] block of the copyablePrompt
+FEATURE 4 — Sidebar Navigation Update
+What to change: src/components/Sidebar.jsx
+Add "Music" and "Voiceover" as sub-items under the current project in the sidebar — only visible when a project is open.
+Dashboard
+  New Project
+  ─────────────
+  CURRENT PROJECT
+  ├─ Story
+  ├─ Video Prompts
+  ├─ Music
+  └─ Voiceover
+  ─────────────
+  History
+  Settings
+"CURRENT PROJECT" section only shows when currentProject is not null in AppContext.
+Each sub-item is indented 16px from main nav items. Same active state styling (left border accent).
+FEATURE 5 — Project Schema Update
+What to change: src/context/AppContext.jsx
+Add these fields to the project object:
+{
+  // ... existing fields ...
+  totalDurationSeconds: number,   // e.g. 60
+  partsCount: number,             // e.g. 4
+  style: string,                  // e.g. "Live Action Cinematic"
+  voiceoverLanguage: string,      // "none" | "hindi" | "english" | "hinglish"
+  
+  // Each part now includes:
+  parts: [
+    {
+      partNumber: 1,
+      shots: [],
+      effectsInventory: [],
+      densityMap: [],
+      energyArc: {},
+      lastFrameDescription: string,
+      autoVoiceoverScript: string | null,   // auto-written VO if language was set
+      voiceoverLanguage: string | null,
+      bgmStyle: string | null,
+      bgmTempo: string | null,
+      audioSummary: {
+        voiceoverIncluded: boolean,
+        bgmIncluded: boolean,
+        keySyncPoints: []
+      },
+      copyablePrompt: string   // complete prompt with [VISUAL STYLE] + [BGM] + [VOICEOVER] + shots
+    }
+  ]
+}
+FEATURE 6 — Dashboard Update
+What to change: src/pages/Dashboard.jsx
+Update Recent Projects cards to show the new metadata:
+Each project card now shows:
+Title
+Style badge (with the style's unique border color as chip color)
+Duration chip (e.g. "1 min")
+Parts count (e.g. "4 parts")
+Voiceover language chip (if not "none")
+Date
+Quick Start cards — update labels:
+"New Story" stays the same
+"Quick Prompt" → rename to "Quick Video" — skips story, goes to StoryBuilder with genre pre-selected as "Quick"
+"From Template" → show 6 preset templates as a modal:
+Product Launch Ad — 30s, Live Action, Hinglish
+Cinematic Travel Reel — 1 min, Cinematic, No VO
+Anime Short — 30s, Anime 2D, No VO
+Brand Film — 2 min, Live Action, English
+Horror Short — 1 min, Horror Atmospheric, No VO
+Motivational Reel — 30s, Music Video Hyper, Hindi
+Each template pre-fills all story builder fields and takes user straight to brief input.
+WHAT NOT TO CHANGE
+❌ Do NOT change the design system (colors, fonts, spacing)
+❌ Do NOT change Music Generator page
+❌ Do NOT change Voiceover Generator page (they still work as standalone tools)
+❌ Do NOT change History page
+❌ Do NOT change Settings page
+❌ Do NOT change the Seedance system prompt (it's already correct)
+❌ Do NOT rebuild from scratch — only extend existing components
+TESTING CHECKLIST
+[ ] Duration selector shows all 6 options with correct part count sub-labels
+[ ] Custom duration input (min + sec) calculates partsCount correctly
+[ ] Style grid shows all 12 styles with correct border colors and descriptors
+[ ] Voiceover language toggle has 4 options, "No Voiceover" default
+[ ] Summary line above Generate button updates in real-time as selections change
+[ ] Generate button disabled until both style + duration are selected
+[ ] Story generates and all 3 selections (style, duration, VO language) are confirmed below story
+[ ] "Generate Video Prompts" button appears below story without page navigation
+[ ] Clicking it shows the inline audio attachment panel
+[ ] BGM chip auto-suggests based on story mood
+[ ] Parts generate one by one with live progress bar
+[ ] Each part card appears immediately after it finishes
+[ ] Copy Full Prompt copies complete prompt with [VISUAL STYLE] + [BGM] + [VOICEOVER] + all shots
+[ ] Auto-voiceover script is written by Claude and embedded in prompt when VO language is not "none"
+[ ] Sidebar shows current project sub-nav when a project is open
+[ ] Project cards in dashboard show new metadata (style, duration, parts count, VO language)
+[ ] Template modal works and pre-fills all story builder fields
+[ ] All new project data (style, duration, partsCount, voiceoverLanguage) saves to localStorage
+Extend the existing app only. Do not restart. Every feature listed above must work end-to-end.

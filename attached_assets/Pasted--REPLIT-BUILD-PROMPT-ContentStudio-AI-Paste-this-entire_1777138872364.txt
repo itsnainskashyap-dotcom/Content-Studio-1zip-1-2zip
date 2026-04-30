@@ -1,0 +1,514 @@
+# REPLIT BUILD PROMPT — ContentStudio AI
+### Paste this entire prompt into Replit AI / Agent to build the full app.
+
+---
+
+## PROJECT OVERVIEW
+
+Build a full-stack web application called **ContentStudio AI** — a professional video prompt generation platform for AI video tools like Seedance 2.0. This is built for serious content creators, filmmakers, and creative directors. It must look like it was designed by a world-class product design team with 20+ years of experience. Zero AI-generated look. No purple gradients. No generic layouts.
+
+**Stack:** React (Vite) + Node.js/Express backend + Claude API (already available in Replit via environment variable `ANTHROPIC_API_KEY`)
+
+---
+
+## DESIGN SYSTEM
+
+### Visual Identity
+- **App Name:** ContentStudio AI
+- **Tagline:** "From idea to shot list in seconds."
+- **Color Palette:**
+  - Background: `#0A0A0A` (near black)
+  - Surface: `#111111`
+  - Card: `#161616`
+  - Border: `#222222`
+  - Accent: `#E8FF47` (electric lime — the ONE signature color)
+  - Accent hover: `#D4EB3A`
+  - Text primary: `#F0F0F0`
+  - Text secondary: `#888888`
+  - Text muted: `#444444`
+  - Success: `#4ADE80`
+  - Error: `#FF4444`
+
+- **Typography:**
+  - Display/Headings: `'Bebas Neue'` (Google Fonts) — sharp, editorial, cinematic
+  - Body/UI: `'DM Sans'` (Google Fonts) — clean, readable, modern
+  - Monospace/Code blocks: `'JetBrains Mono'` (Google Fonts) — for prompts output
+
+- **Motion:** Smooth 200ms transitions everywhere. Subtle slide-in animations on page load. No jarring effects.
+
+- **Borders:** 1px `#222222` borders on all cards. Rounded corners: 8px for cards, 6px for buttons, 4px for inputs.
+
+- **No shadows** — use borders instead. Flat, editorial aesthetic.
+
+---
+
+## APP ARCHITECTURE
+
+### Pages/Views (Single Page App with React Router)
+1. `/` — Dashboard / Home
+2. `/story` — Story Builder
+3. `/generate` — Video Prompt Generator
+4. `/history` — Project History
+5. `/settings` — API/Preferences
+
+### Persistent State (localStorage + React Context)
+- All projects saved to `localStorage`
+- Each project has: `id`, `title`, `story`, `style`, `duration`, `shots[]`, `createdAt`, `updatedAt`
+- App loads all projects on startup from localStorage
+
+---
+
+## BACKEND (Node.js + Express)
+
+### File: `server/index.js`
+
+Create an Express server with these endpoints:
+
+#### POST `/api/generate-story`
+- Input: `{ brief: string, genre: string, duration: number }`
+- System prompt instructs Claude to return a structured story JSON
+- Response: `{ title, synopsis, acts: [{actNumber, title, description, keyMoment}], characters: [{name, description}], mood, colorPalette, musicSuggestion }`
+
+#### POST `/api/generate-video-prompts`
+- Input: `{ story: object, style: string, duration: number, part: number, totalParts: number, previousLastFrame: string }`
+- Uses the full Seedance 2.0 skill system prompt (embedded below)
+- Returns structured shot-by-shot prompts with continuation logic
+- Response: `{ shots: [], effectsInventory: [], densityMap: [], energyArc: string, lastFrameDescription: string, copyablePrompt: string }`
+
+#### POST `/api/continue-story`
+- Input: `{ existingStory: object, direction: string }`
+- Extends the story with new acts
+- Response: same story structure with additional acts
+
+#### GET `/api/health`
+- Returns `{ status: "ok", timestamp: Date.now() }`
+
+### Claude API Integration (server-side)
+
+Use `@anthropic-ai/sdk` npm package.
+
+```javascript
+import Anthropic from '@anthropic-ai/sdk';
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+```
+
+**For all API calls use:** `claude-opus-4-5` model, `max_tokens: 4096`
+
+**Embedded Seedance 2.0 System Prompt** (use this exactly in `/api/generate-video-prompts`):
+
+```
+You are a specialist AI video prompt writer for Seedance 2.0. Your job is to take a creative brief and transform it into a detailed, shot-by-shot video generation prompt.
+
+CRITICAL RULES:
+1. Always output ALL FOUR sections: SHOT-BY-SHOT EFFECTS TIMELINE, MASTER EFFECTS INVENTORY, EFFECTS DENSITY MAP, ENERGY ARC
+2. Each shot = 1–4 seconds. Name effects precisely: "speed ramp (deceleration)" not "speed ramp"
+3. If 3 effects happen simultaneously, list all 3 explicitly
+4. Mark the most impactful shot: "This is the SIGNATURE VISUAL EFFECT"
+5. Be specific about speed: "approximately 20–25% speed" not "slow motion"
+6. LAST FRAME RULE: Always end with a "CONTINUATION FRAME" section describing exactly what the last frame looks like — subject position, camera angle, lighting, environment state — so the next video part can seamlessly continue.
+7. Never let energy drop without intention. Every transition is a creative decision.
+8. Return response as valid JSON with this structure:
+{
+  "shots": [
+    {
+      "shotNumber": 1,
+      "timestamp": "00:00-00:03",
+      "name": "Shot name",
+      "effects": ["effect1", "effect2"],
+      "description": "Visual description",
+      "cameraWork": "Camera behaviour",
+      "speed": "Speed/timing info",
+      "transition": "How this exits to next shot",
+      "isSignature": false
+    }
+  ],
+  "effectsInventory": [
+    {
+      "name": "Effect name",
+      "usedCount": 2,
+      "shots": [1, 3],
+      "role": "Role in edit"
+    }
+  ],
+  "densityMap": [
+    {
+      "timeRange": "00:00-00:03",
+      "density": "HIGH",
+      "effects": ["effect1"],
+      "count": 3,
+      "duration": "3s"
+    }
+  ],
+  "energyArc": {
+    "act1": "Description",
+    "act2": "Description",
+    "act3": "Description"
+  },
+  "lastFrameDescription": "Exact description of the final frame for seamless continuation",
+  "copyablePrompt": "The full plain-text prompt ready to paste into Seedance 2.0"
+}
+```
+
+STYLE INSTRUCTIONS WILL BE PROVIDED PER REQUEST. Follow them exactly.
+```
+
+---
+
+## FRONTEND COMPONENTS
+
+### 1. App Shell (`src/App.jsx`)
+- Dark sidebar (240px wide, fixed) + main content area
+- Sidebar contains: Logo, nav links, recent projects list (last 5), bottom: settings link
+- Main area has topbar with: breadcrumb, current project name, action buttons
+- Smooth page transitions using React Router + CSS transitions
+
+### 2. Sidebar (`src/components/Sidebar.jsx`)
+- ContentStudio AI logo at top (text-based, Bebas Neue, accent color on "AI")
+- Nav items: Dashboard, New Project, History, Settings
+- "Recent Projects" section showing last 5 projects with click-to-open
+- Each project shows: title (truncated), style badge, date
+- Active state: left border in accent color `#E8FF47`
+
+### 3. Dashboard (`src/pages/Dashboard.jsx`)
+**Hero section:**
+- Large heading: "Turn Stories Into\nCinematic Prompts" (Bebas Neue, 72px)
+- Sub: "AI-powered shot lists for Seedance 2.0 — copy, paste, generate."
+- Two CTA buttons: "Start New Project" (accent filled) + "View History" (outline)
+
+**Stats row:** Total Projects | Total Shots Generated | Most Used Style
+
+**Quick Start cards** (3 columns):
+- "New Story" → goes to Story Builder
+- "Quick Prompt" → skips story, goes straight to prompt generator
+- "From Template" → shows preset story templates
+
+**Recent Projects grid:** Last 6 projects as cards showing title, style, duration, date, quick-action buttons
+
+### 4. Story Builder (`src/pages/StoryBuilder.jsx`)
+
+**Step 1 — Brief Input:**
+- Large textarea: "Describe your video concept..." (placeholder)
+- Genre selector: grid of clickable pills — Action, Drama, Horror, Romance, Sci-Fi, Fantasy, Documentary, Comedy, Thriller, Mystery, Adventure, Slice of Life
+- Duration selector: 5s / 10s / 15s / 20s / 30s / 60s / Custom
+- "Generate Story" button (full-width, accent)
+
+**Step 2 — Story Display (after generation):**
+- Story title (large, Bebas Neue)
+- Synopsis block
+- Acts timeline: horizontal scrollable cards, each act showing title + key moment
+- Characters sidebar
+- Mood + Color Palette chips
+- Music suggestion chip
+- Two action buttons: "Regenerate" (outline) + "Generate Video Prompts →" (accent filled)
+- Story is saved to localStorage immediately on generation
+
+**Loading state:** Skeleton loaders for all sections. "Writing your story..." text with animated dots.
+
+### 5. Video Prompt Generator (`src/pages/PromptGenerator.jsx`)
+
+**Style Selector (full-screen step before generation):**
+
+Show a beautiful grid of style cards. Each card has:
+- Style name (large)
+- Short description
+- Visual indicator (colored border/gradient unique to each style)
+- Example keywords
+
+**Styles available:**
+1. **Live Action Cinematic** — Real camera, photorealistic, film grain, anamorphic lens flares
+2. **Anime 2D** — Hand-drawn animation style, cel shading, dramatic lighting, Japanese anime aesthetic
+3. **3D Pixar Style** — Soft lighting, subsurface scattering, exaggerated proportions, Pixar-quality render
+4. **Pixel Art** — 16-bit / 32-bit pixel aesthetic, retro gaming, limited color palette
+5. **Studio Ghibli** — Painterly watercolor backgrounds, Miyazaki movement principles, soft natural lighting
+6. **Cyberpunk Neon** — Neon lighting, rain-slicked streets, holographic UI overlays, blade runner aesthetic
+7. **Dark Fantasy** — Gothic, dramatic shadows, fog, medieval/magical environment, dark color grading
+8. **Claymation** — Stop-motion clay texture, soft rounded forms, tactile warmth
+9. **Wes Anderson** — Symmetrical framing, pastel palette, deadpan flat lighting, whimsy
+10. **Documentary Handheld** — Naturalistic, handheld shake, available light, vérité style
+11. **Horror Atmospheric** — Deep shadows, desaturated color, slow creeping dread, unsettling angles
+12. **Music Video — Hyper Edit** — Fast cuts, speed ramps, flash transitions, high-energy rhythm editing
+
+**Duration per part selector:** 5s / 10s / 15s / 20s
+
+**After style + duration selection → Generation View:**
+
+- Progress bar showing: Part 1 of N being generated
+- Each part generates sequentially
+- For each part, show:
+  - Part number badge
+  - Shot cards (expandable) — each card shows shot number, timestamp, effects list, description
+  - "SIGNATURE SHOT" badge on the signature shot
+  - Density map visualization (color-coded bar: red=HIGH, yellow=MEDIUM, green=LOW)
+  - Energy arc diagram (simple three-block visual with act labels)
+  - **Big "Copy Prompt" button** — copies the `copyablePrompt` text to clipboard
+  - Copied state: button turns green with checkmark for 2 seconds
+
+**Continuation logic:**
+- Each part's `lastFrameDescription` is fed into the next part's API call
+- Show "Continues from Part N" indicator on each part after the first
+- Visual connector line between part cards
+
+**After all parts generated:**
+- "Complete Prompt Package" summary section
+- Download all prompts as `.txt` file button
+- Share/Save to project button
+
+### 6. History (`src/pages/History.jsx`)
+- All saved projects in a sortable, filterable list
+- Filter by: Style, Duration, Date range
+- Sort by: Newest, Oldest, Most shots
+- Each project row: title, style badge, duration, shot count, date, action buttons (Open, Duplicate, Delete)
+- Empty state: illustration + "No projects yet. Start creating." + CTA button
+- Delete with confirmation modal
+
+### 7. Settings (`src/pages/Settings.jsx`)
+- Default duration preference
+- Default style preference
+- Clear all history button (with confirmation)
+- About section: app version, credits
+
+---
+
+## STATE MANAGEMENT (`src/context/AppContext.jsx`)
+
+```javascript
+// AppContext provides:
+{
+  projects: [],           // All saved projects
+  currentProject: null,   // Currently active project
+  createProject: (data) => {},
+  updateProject: (id, data) => {},
+  deleteProject: (id) => {},
+  loadProject: (id) => {},
+  settings: {},
+  updateSettings: (data) => {}
+}
+
+// localStorage keys:
+// 'cs_projects' → JSON array of all projects
+// 'cs_settings' → JSON object of settings
+// 'cs_current_project_id' → string ID of last opened project
+```
+
+Every project has this shape:
+```javascript
+{
+  id: crypto.randomUUID(),
+  title: string,
+  brief: string,
+  genre: string,
+  story: {
+    title, synopsis, acts, characters, mood, colorPalette, musicSuggestion
+  } | null,
+  style: string | null,
+  duration: number, // per part in seconds
+  parts: [
+    {
+      partNumber: 1,
+      shots: [],
+      effectsInventory: [],
+      densityMap: [],
+      energyArc: {},
+      lastFrameDescription: string,
+      copyablePrompt: string
+    }
+  ],
+  createdAt: ISO string,
+  updatedAt: ISO string
+}
+```
+
+---
+
+## API ERROR HANDLING
+
+- All API calls wrapped in try/catch
+- Show inline error messages (red bordered card) on failure
+- "Retry" button on every error state
+- Loading spinner on every async operation
+- Timeout after 60 seconds with error message
+- Rate limit handling: show "Please wait 30 seconds" message
+
+---
+
+## COPY PROMPT FEATURE
+
+This is the most critical UX feature. Make it bulletproof:
+
+```javascript
+const copyPrompt = async (text) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  } catch {
+    // Fallback for non-HTTPS
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+};
+```
+
+Button states:
+- Default: "Copy Prompt" with copy icon
+- Copied: "Copied!" with checkmark, accent background
+- Transition: smooth 150ms color change
+
+---
+
+## MOBILE RESPONSIVENESS
+
+- Sidebar collapses to bottom nav bar on mobile (< 768px)
+- All grids go to single column on mobile
+- Font sizes scale down
+- Touch-friendly tap targets (min 44px)
+- Horizontal scroll on shot cards on mobile
+
+---
+
+## PACKAGE.JSON DEPENDENCIES
+
+```json
+{
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.20.0",
+    "@anthropic-ai/sdk": "^0.27.0",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "@vitejs/plugin-react": "^4.2.0"
+  }
+}
+```
+
+Google Fonts to load in `index.html`:
+```html
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+```
+
+---
+
+## VITE CONFIG (`vite.config.js`)
+
+```javascript
+export default {
+  server: {
+    proxy: {
+      '/api': 'http://localhost:3001'
+    }
+  }
+}
+```
+
+---
+
+## FILE STRUCTURE
+
+```
+contentstudio-ai/
+├── server/
+│   └── index.js          (Express backend)
+├── src/
+│   ├── main.jsx
+│   ├── App.jsx
+│   ├── App.css           (global styles + CSS variables)
+│   ├── context/
+│   │   └── AppContext.jsx
+│   ├── components/
+│   │   ├── Sidebar.jsx
+│   │   ├── Topbar.jsx
+│   │   ├── ProjectCard.jsx
+│   │   ├── ShotCard.jsx
+│   │   ├── StyleCard.jsx
+│   │   ├── DensityBar.jsx
+│   │   ├── EnergyArcDiagram.jsx
+│   │   ├── CopyButton.jsx
+│   │   ├── LoadingSkeleton.jsx
+│   │   └── Modal.jsx
+│   └── pages/
+│       ├── Dashboard.jsx
+│       ├── StoryBuilder.jsx
+│       ├── PromptGenerator.jsx
+│       ├── History.jsx
+│       └── Settings.jsx
+├── index.html
+├── package.json
+└── vite.config.js
+```
+
+---
+
+## GLOBAL CSS VARIABLES (`src/App.css`)
+
+```css
+:root {
+  --bg: #0A0A0A;
+  --surface: #111111;
+  --card: #161616;
+  --border: #222222;
+  --accent: #E8FF47;
+  --accent-hover: #D4EB3A;
+  --text: #F0F0F0;
+  --text-secondary: #888888;
+  --text-muted: #444444;
+  --success: #4ADE80;
+  --error: #FF4444;
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius: 8px;
+  --radius-sm: 4px;
+  --transition: 200ms ease;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-body); }
+```
+
+---
+
+## IMPORTANT: WHAT NOT TO DO
+
+- ❌ No purple/blue gradients anywhere
+- ❌ No Inter, Roboto, or Arial fonts
+- ❌ No generic hero sections with stock-image-style backgrounds
+- ❌ No Bootstrap or Tailwind (write custom CSS)
+- ❌ No lorem ipsum placeholder text
+- ❌ No fake/mock API calls — all calls go to real Claude API
+- ❌ No alerts() or confirms() — use modal components
+- ❌ No console.log left in production code (only console.error for errors)
+- ❌ Do NOT expose ANTHROPIC_API_KEY to frontend — all API calls go through Express backend
+
+---
+
+## QUALITY CHECKLIST (verify before finishing)
+
+- [ ] All 5 pages render without errors
+- [ ] Story generation creates real AI content via Claude API
+- [ ] Video prompt generation works for all 12 styles
+- [ ] Continuation logic feeds lastFrame into next part correctly
+- [ ] Copy button works and shows copied state
+- [ ] All projects save to localStorage and persist on refresh
+- [ ] History page shows all projects
+- [ ] Delete project with confirmation modal works
+- [ ] Mobile layout works below 768px
+- [ ] Error states display properly on API failures
+- [ ] Loading skeletons show during all async operations
+- [ ] Font: Bebas Neue for headings, DM Sans for body, JetBrains Mono for prompts
+- [ ] Accent color #E8FF47 used consistently for CTAs and highlights
+- [ ] No console errors in browser
+
+---
+
+**Build this completely. Do not stop halfway. Every component, every page, every API route. This is a production application.**

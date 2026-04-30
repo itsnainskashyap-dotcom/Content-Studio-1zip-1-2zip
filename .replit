@@ -1,0 +1,45 @@
+modules = ["nodejs-24", "python-3.11", "postgresql-16"]
+
+[deployment]
+router = "application"
+deploymentTarget = "autoscale"
+
+# Pre-build hook: build the React frontend so the API Server can serve
+# its dist/public files in production. The api-server artifact build
+# (defined in its own artifact.toml) runs after this.
+[deployment.build]
+args = ["pnpm", "--filter", "@workspace/contentstudio-ai", "run", "build"]
+# PORT and BASE_PATH are required by contentstudio-ai/vite.config.ts at
+# config-load time. They are dev-server values; in production the built
+# files are served by api-server, but vite still needs them set so the
+# config module loads cleanly.
+env = { "CI" = "true", "NODE_ENV" = "production", "PORT" = "20654", "BASE_PATH" = "/" }
+
+[deployment.postBuild]
+args = ["pnpm", "store", "prune"]
+env = { "CI" = "true" }
+
+[workflows]
+
+[agent]
+stack = "PNPM_WORKSPACE"
+expertMode = true
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 20000
+
+[[ports]]
+localPort = 8080
+externalPort = 80
+
+[[ports]]
+localPort = 8081
+externalPort = 8081
+
+[[ports]]
+localPort = 20654
+externalPort = 3000
+
+[nix]
+channel = "stable-25_05"

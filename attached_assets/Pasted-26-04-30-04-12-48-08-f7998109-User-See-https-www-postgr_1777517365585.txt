@@ -1,0 +1,149 @@
+26-04-30 04:12:48.08
+f7998109
+User
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+2026-04-30 04:12:48.08
+f7998109
+User
+(node:19) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+2026-04-30 04:12:48.08
+f7998109
+User
+To prepare for this change:
+2026-04-30 04:12:48.08
+f7998109
+User
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+2026-04-30 04:12:48.08
+f7998109
+User
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+2026-04-30 04:12:48.08
+f7998109
+User
+(Use `node --trace-warnings ...` to show where the warning was created)
+2026-04-30 05:47:44.86
+48a73c59
+User
+To prepare for this change:
+2026-04-30 05:47:44.86
+48a73c59
+User
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+2026-04-30 05:47:44.86
+48a73c59
+User
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+2026-04-30 05:47:44.86
+48a73c59
+User
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+2026-04-30 05:47:44.86
+48a73c59
+User
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+2026-04-30 05:47:44.86
+48a73c59
+User
+(node:20) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+2026-04-30 05:47:44.86
+48a73c59
+User
+(Use `node --trace-warnings ...` to show where the warning was created)
+2026-04-30 05:50:05.78
+f7998109
+System
+artifact process exited with error error=signal: terminated artifact=artifacts/api-server
+2026-04-30 05:51:13.91
+48a73c59
+User
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+2026-04-30 05:51:13.91
+48a73c59
+User
+(Use `node --trace-warnings ...` to show where the warning was created)
+2026-04-30 05:51:13.91
+48a73c59
+User
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+2026-04-30 05:51:13.91
+48a73c59
+User
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+2026-04-30 05:51:13.91
+48a73c59
+User
+(node:20) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+2026-04-30 05:51:13.91
+48a73c59
+User
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+2026-04-30 05:51:13.91
+48a73c59
+User
+To prepare for this change:
+2026-04-30 05:56:05.15
+48a73c59
+System
+artifact process exited with error artifact=artifacts/api-server error=signal: terminated
+2026-04-30 06:25:10.77
+48a73c59
+System
+artifact process exited with error error=signal: terminated artifact=artifacts/api-server
+2026-04-30 06:26:41.30
+53d6f9ae
+User
+(Use `node --trace-warnings ...` to show where the warning was created)
+2026-04-30 06:26:41.30
+53d6f9ae
+User
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+2026-04-30 06:26:41.30
+53d6f9ae
+User
+To prepare for this change:
+2026-04-30 06:26:41.30
+53d6f9ae
+User
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+2026-04-30 06:26:41.30
+53d6f9ae
+User
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+2026-04-30 06:26:41.30
+53d6f9ae
+User
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+2026-04-30 06:26:41.30
+53d6f9ae
+User
+(node:19) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+2026-04-30 07:23:24.37
+53d6f9ae
+System
+artifact process exited with error error=signal: terminated artifact=artifacts/api-server
+2026-04-30 07:23:39.93
+376c5ec4
+User
+To prepare for this change:
+2026-04-30 07:23:39.93
+376c5ec4
+User
+(node:19) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+2026-04-30 07:23:39.93
+376c5ec4
+User
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+2026-04-30 07:23:39.93
+376c5ec4
+User
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+2026-04-30 07:23:39.93
+376c5ec4
+User
+(Use `node --trace-warnings ...` to show where the warning was created)
+2026-04-30 07:23:39.93
+376c5ec4
+User
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+

@@ -1,0 +1,20 @@
+{
+  "name": "@workspace/integrations-anthropic-ai",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./batch": "./src/batch/index.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
+    "@anthropic-ai/vertex-sdk": "^0.13.2",
+    "google-auth-library": "^10.6.2",
+    "p-limit": "^7.3.0",
+    "p-retry": "^7.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  }
+}

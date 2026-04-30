@@ -1,0 +1,224 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "30H8PztRUbJF7Unec4_p2"
+uri = "file://artifacts/contentstudio-ai/public/landing-hero-bg.png"
+type = "image"
+title = "landing hero bg"
+
+[[generated]]
+id = "dq_0O16HA-CVFhm4ikij3"
+uri = "file://artifacts/contentstudio-ai/public/icon-story-chat.png"
+type = "image"
+title = "story chat icon"
+
+[[generated]]
+id = "dwTHL3ahyENRWqn49TEhy"
+uri = "file://artifacts/contentstudio-ai/public/icon-shot-list.png"
+type = "image"
+title = "shot list icon"
+
+[[generated]]
+id = "pUrOrqYgXihWTo0D1DAcp"
+uri = "file://artifacts/contentstudio-ai/public/icon-background-gen.png"
+type = "image"
+title = "bg generation icon"
+
+[[generated]]
+id = "TtFQvK3RWp2ASCMgEh1bj"
+uri = "file://artifacts/contentstudio-ai/public/icon-music-brief.png"
+type = "image"
+title = "music brief icon"
+
+[[generated]]
+id = "KLjyI9EIqnCn4SpPLIGmi"
+uri = "file://artifacts/contentstudio-ai/public/icon-voiceover.png"
+type = "image"
+title = "voiceover icon"
+
+[[generated]]
+id = "_YJ4P4sIBi-z4vgyqcc77"
+uri = "file://artifacts/contentstudio-ai/public/icon-honest-ai.png"
+type = "image"
+title = "honest ai icon"
+
+[[generated]]
+id = "QkwH-uF8sapmPxNx27wm1"
+uri = "file://artifacts/contentstudio-ai/public/style-presets/cinematic-live-action.png"
+type = "image"
+title = "cinematic live action preset"
+
+[[generated]]
+id = "iRSOsm2cou_1dshmcH9Z7"
+uri = "file://artifacts/contentstudio-ai/public/style-presets/anime-2d.png"
+type = "image"
+title = "anime 2d preset"
+
+[[generated]]
+id = "c7iqBNyCv4UwNIP3sFAE0"
+uri = "file://artifacts/contentstudio-ai/public/style-presets/pixar-3d.png"
+type = "image"
+title = "pixar 3d preset"
+
+[[generated]]
+id = "lHCtjdJIKHjyq2FEkhVFO"
+uri = "file://artifacts/contentstudio-ai/public/style-presets/dark-fantasy.png"
+type = "image"
+title = "dark fantasy preset"
+
+[[generated]]
+id = "zkydzIvgCqNGtH5z712fk"
+uri = "file://artifacts/contentstudio-ai/public/landing/hero-portal.png"
+type = "image"
+title = "hero portal cinematic"
+
+[[generated]]
+id = "UmZBOu0wuWvMUYBe5NMve"
+uri = "file://artifacts/contentstudio-ai/public/cinematic/hero-camera-lens.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "ClOkk5YvvAChyAbnL6R-p"
+uri = "file://artifacts/contentstudio-ai/public/cinematic/module-story-builder.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "6b299Z3fXo3AnO0mtQSPm"
+uri = "file://artifacts/contentstudio-ai/public/cinematic/module-video-prompts.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "OXbsmosGgdyI6S12b861g"
+uri = "file://artifacts/contentstudio-ai/public/cinematic/module-video-studio.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "JW1EtK7xeFAJoNFCh-EKA"
+uri = "file://artifacts/contentstudio-ai/public/cinematic/module-cinema-studio.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "_b9bPzppkgBFqQelYsvbd"
+uri = "file://artifacts/contentstudio-ai/public/cinematic/module-voiceover.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "IQhH3O2do0hHNy-p-6QVy"
+uri = "file://artifacts/contentstudio-ai/public/cinematic/icon-clapperboard.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "K5-06xiZxSPaX2aeUUVjH"
+uri = "file://artifacts/contentstudio-ai/public/cinematic/icon-film-reel.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "1dgR5FBZgx4ttzRygBmhI"
+uri = "file://artifacts/contentstudio-ai/public/cinematic/icon-camera.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "c8KPkAt4dWh7KqQsDmIu8"
+uri = "file://artifacts/contentstudio-ai/public/cinematic/icon-microphone.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "hNyoQj9mihJ4UwFDLSbJb"
+uri = "file://artifacts/contentstudio-ai/public/cinematic/story-header-bg.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "1OHXCKy6-gjJBddHgIJ9O"
+uri = "file://artifacts/contentstudio-ai/public/cinematic/director-chair.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "IV8R95SJCrZFbepN5e1Vx"
+uri = "file://artifacts/contentstudio-ai/public/cinematic/film-canisters.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "QeB-z0nfscV6_KgOApPuE"
+uri = "file://artifacts/contentstudio-ai/public/cinematic/generation-network.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "-SfC7-JXIP1a1zWT0BQBt"
+uri = "file://artifacts/contentstudio-ai/public/cinematic/cinema-theatre.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "Zywo9_OpHwO4PpUKAVUBa"
+uri = "file://artifacts/contentstudio-ai/public/cinematic/icon-music.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "ylDqqADdHl4nQS4Lg_CM7"
+uri = "file://artifacts/contentstudio-ai/public/cinematic/icon-slate.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "V1etBZohYbZaHIkZKJoHT"
+uri = "file://artifacts/contentstudio-ai/public/cinematic/icon-ai-spark.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "9ZtLlrE8OmfFLS1YnYCEx"
+uri = "file://artifacts/contentstudio-ai/public/cinematic/icon-play.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "K-brNQ--UId-mDB1GyVpJ"
+uri = "file://artifacts/contentstudio-ai/public/cinematic/icon-spotlight.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "5UdHv4gIXywzWQwzpQ7Nz"
+uri = "file://artifacts/contentstudio-ai/public/cinematic/icon-waveform.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "9_Zr__bhnpR7MHwOcaqq1"
+uri = "file://artifacts/contentstudio-ai/public/cinematic/icon-projector.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "Ccv00s1OyFjZYUgEnTmDQ"
+uri = "file://artifacts/contentstudio-ai/public/cinematic/icon-storyboard.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "om5DFr5Mpc6D1S-x5u_Rg"
+uri = "file://artifacts/contentstudio-ai/public/cinematic/lens-collection.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "lzOcd0hcRb6iDo3rTglKG"
+uri = "file://artifacts/contentstudio-ai/public/cinematic/grading-suite.png"
+type = "image"
+title = "generated_image"
